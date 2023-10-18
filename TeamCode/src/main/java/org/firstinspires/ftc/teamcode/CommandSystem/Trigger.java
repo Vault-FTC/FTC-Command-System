@@ -1,16 +1,37 @@
 package org.firstinspires.ftc.teamcode.CommandSystem;
 
-public class Trigger {
+import java.util.function.BooleanSupplier;
 
-    protected Command onTrue;
+public class Trigger implements BooleanSupplier {
+    private BooleanSupplier condition;
+    private boolean lastState = false;
+
+    public Trigger(BooleanSupplier condition) {
+        this.condition = condition;
+    }
+
     public Trigger() {
-        CommandScheduler.getInstance().addTrigger(this);
+        this(() -> false);
     }
 
-    public void onTrue(Command command) {
-        onTrue = command;
+    public Trigger whileTrue(Command command) {
+        command.triggers.add(this);
+        return this;
     }
-    boolean fired() {
-        return false;
+
+    public Trigger onTrue(Command command) {
+        command.triggers.add(new Trigger(() -> !lastState && getAsBoolean()));
+        return this;
+    }
+
+    public Trigger onFalse(Command command) {
+        command.triggers.add(new Trigger(() -> lastState && !getAsBoolean()));
+        return this;
+    }
+
+    @Override
+    public boolean getAsBoolean() {
+        lastState = condition.getAsBoolean();
+        return lastState;
     }
 }

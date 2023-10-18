@@ -2,36 +2,45 @@ package org.firstinspires.ftc.teamcode.CommandSystem;
 
 import java.util.ArrayList;
 
-public class CommandScheduler {
+public final class CommandScheduler implements Runnable {
     private static CommandScheduler instance = null;
-    private ArrayList<Command> commands;
-
-    private ArrayList<Trigger> triggers;
+    ArrayList<Command> commands;
+    ArrayList<Subsystem> subsystems;
 
     public CommandScheduler() {
         commands = new ArrayList<>();
+        subsystems = new ArrayList<>();
     }
 
-    public void addTrigger(Trigger trigger) {
-        triggers.add(trigger);
+    public void schedule(Command command) {
+        command.schedule();
     }
+
+    @Override
     public void run() {
-        for (Trigger trigger : triggers) {
-            if (trigger.fired()) {
-                trigger.onTrue.state = Command.State.INITIALIZED;
-            }
+        for (Subsystem subsystem : subsystems) {
+            subsystem.periodic();
         }
         for (Command command : commands) {
-            if (command.isFinished(false)) {
+            if (command.triggered() && command.state == Command.State.UNSCHEDULED)
                 command.state = Command.State.QUEUED;
-            }
-            switch(command.state) {
+        }
+        for (Subsystem subsystem : subsystems) {
+            subsystem.cancelConflictingCommands();
+        }
+        for (Command command : commands) {
+            switch (command.state) {
+                case QUEUED:
+                    command.state = Command.State.SCHEDULED;
+                    command.initialize();
+                    break;
                 case SCHEDULED:
+                    if (command.isFinished()) command.state = Command.State.ENDING;
                     command.execute();
                     break;
-                case INITIALIZED:
-                    command.initialize();
-                    command.state = Command.State.SCHEDULED;
+                case ENDING:
+                    command.state = Command.State.UNSCHEDULED;
+                    command.end(false);
                     break;
             }
         }
