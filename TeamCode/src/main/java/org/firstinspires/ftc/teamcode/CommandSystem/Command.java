@@ -46,7 +46,7 @@ public abstract class Command {
     }
 
     public boolean isFinished() {
-        return false;
+        return true;
     }
 
     public void schedule() {

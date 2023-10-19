@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.CommandSystem;
 
 import java.util.ArrayList;
 
-public class Subsystem {
+public abstract class Subsystem {
 
     ArrayList<Command> requirements;
 
@@ -35,7 +35,7 @@ public class Subsystem {
     public final void setDefaultCommand(Command command) {
         command.type = Command.Type.DEFAULT_COMMAND;
         defaultCommand.type = Command.Type.NORMAL;
-
+        defaultCommand = command;
     }
 
     public void periodic() {
