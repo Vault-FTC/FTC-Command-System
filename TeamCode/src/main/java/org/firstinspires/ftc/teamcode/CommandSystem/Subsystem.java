@@ -24,6 +24,7 @@ public abstract class Subsystem {
                     priority = toRun.type.ordinal();
 
                 if (requirement.type.ordinal() > priority) {
+                    toRun.cancel();
                     toRun = requirement;
                 } else {
                     requirement.cancel();
