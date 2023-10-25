@@ -58,7 +58,7 @@ public abstract class Command {
         end(true);
     }
 
-    protected void addRequirements(Subsystem... subsystems) {
+    protected final void addRequirements(Subsystem... subsystems) {
         for (Subsystem subsystem : subsystems) {
             subsystem.requirements.add(this);
         }
